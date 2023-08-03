@@ -15,7 +15,7 @@ object stockdataanalysis extends App {
     option("inferSchema", true).csv("C:\\Users\\rolls\\Downloads\\BigDataProject\\stockcompanies.csv")
   val dfstockprice = spark.read.option("header", true).
     option("inferSchema", true).csv("C:\\Users\\rolls\\Downloads\\BigDataProject\\stockprice.csv")
-  dfstockcompanies.write.mode("overwrite").format("csv").save("C:\\Users\\rolls\\Downloads\\BigDataProject\\datacsv")
+
   //create stockdata
 
   var stockcompanyView = dfstockcompanies.createTempView("stock_company")
@@ -24,9 +24,11 @@ object stockdataanalysis extends App {
   val query = "select trading_year, trading_month, sc.code as company_code,name as company_name,trim(SUBSTRING_INDEX(Headquarter,';',1)) as headquarters, sector, sub_industry,open as opening, close as closing, low, high, volume from stock_company sc " +
     "inner join (select code,EXTRACT(YEAR FROM to_date(trading_date,'dd/MM/yyyy')) as trading_year,  EXTRACT(MONTH FROM to_date(trading_date,'dd/MM/yyyy')) as trading_month,round(avg(open),2) open, round(avg(close),2) close, round(avg(low),2) low, round(avg(high),2) high,round(avg(volume),2) volume from stock_price group by code,trading_year,trading_month) sp on sc.code=sp.code"
   val dfstockdata = spark.sql(query)
+  dfstockdata.write.mode("overwrite").format("csv").save("C:\\Users\\rolls\\Downloads\\BigDataProject\\datacsv")
+
   var stockdataView = dfstockdata.createTempView("stock_data")
 
-  //store companies max min - trading year trading month
+  //store companies max min - trading year and trading month
   val queryy = "select company_code,company_name, min(trading_year) min_year,max(trading_year) max_year, min(trading_month) min_month, max(trading_month) max_month from stock_data group by company_name,company_code"
   val dfstocktable1 = spark.sql(queryy)
   var stocktable1View = dfstocktable1.createTempView("stock_table1")

@@ -67,7 +67,6 @@ val stockstreamView = stockstreamDf.createOrReplaceTempView("stockstreamdata")
     dataFrame.writeStream
       .format("console")
       .outputMode("append")
-      .trigger(Trigger.ProcessingTime("15 Seconds"))
       .start()
       .awaitTermination()
   }
